@@ -1,0 +1,25 @@
+﻿
+Microsoft Visual Studio Solution File, Format Version 12.00
+# Visual Studio Version 16
+VisualStudioVersion = 16.0.29920.165
+MinimumVisualStudioVersion = 10.0.40219.1
+Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "VKWPF", "VKWPF.csproj", "{FF0566F4-CC6E-45C8-B1D8-89FAF56C145E}"
+EndProject
+Global
+	GlobalSection(SolutionConfigurationPlatforms) = preSolution
+		Debug|Any CPU = Debug|Any CPU
+		Release|Any CPU = Release|Any CPU
+	EndGlobalSection
+	GlobalSection(ProjectConfigurationPlatforms) = postSolution
+		{FF0566F4-CC6E-45C8-B1D8-89FAF56C145E}.Debug|Any CPU.ActiveCfg = Debug|Any CPU
+		{FF0566F4-CC6E-45C8-B1D8-89FAF56C145E}.Debug|Any CPU.Build.0 = Debug|Any CPU
+		{FF0566F4-CC6E-45C8-B1D8-89FAF56C145E}.Release|Any CPU.ActiveCfg = Release|Any CPU
+		{FF0566F4-CC6E-45C8-B1D8-89FAF56C145E}.Release|Any CPU.Build.0 = Release|Any CPU
+	EndGlobalSection
+	GlobalSection(SolutionProperties) = preSolution
+		HideSolutionNode = FALSE
+	EndGlobalSection
+	GlobalSection(ExtensibilityGlobals) = postSolution
+		SolutionGuid = {8E5C853F-D6FD-4962-BAA8-692E445B8A9C}
+	EndGlobalSection
+EndGlobal
