@@ -12,6 +12,7 @@ using System.Windows.Controls;
 using VkNet.Model;
 using Ookii;
 using System.Windows.Media.Imaging;
+using System.Linq;
 
 namespace VKWPF
 {
@@ -47,13 +48,21 @@ namespace VKWPF
 			string url = api.Photo.GetOwnerPhotoUploadServer().UploadUrl;
 			WebClient client = new WebClient();
 			StreamWriter info = new StreamWriter("info.txt", false);
-			int k = 0;
-			foreach (string name in names) {
-				var response = client.UploadFile(url, @name);
+			for (int i = 0; i < names.Length; i++)
+			{
+				var response = client.UploadFile(url, @names[i]);
 				string t = Encoding.UTF8.GetString(response);
-				info.WriteLine(t + "|" + name);
+				info.WriteLine(t + "|" + names[i]);
 				info.Flush();
-				k++;
+				int k = i + 1;
+				m_image.Dispatcher.Invoke(() =>
+				{
+					m_image.Source = new BitmapImage(new Uri(names[(k == names.Length ? 0 : k)], UriKind.Absolute));
+				});
+				m_text.Dispatcher.Invoke(() =>
+				{
+					m_text.Text = k + "/" + names.Length;
+				});
 			}
 			info.Close();
 		}
@@ -95,17 +104,18 @@ namespace VKWPF
 				string[] line = info.ReadLine().Split('|');
 				photos.Add((line[0], line[1]));
 			}
-
-			int k = 0;
+			info.Close();
+			if (photos.Count < Directory.GetFiles(m_path).Length) send(m_path);
 			while (true)
 			{
 				Shuffle(photos);
-				foreach ((string, string) photo in photos)
+				for(int i = 0; i < photos.Count; i++)
 				{
-					api.Photo.SaveOwnerPhoto(photo.Item1);
+					int k = i + 1;
+					api.Photo.SaveOwnerPhoto(photos[i].Item1);
 					m_image.Dispatcher.Invoke(() =>
 					{
-						m_image.Source = new BitmapImage(new Uri(photo.Item2, UriKind.Absolute));
+						m_image.Source = new BitmapImage(new Uri(photos[(k == photos.Count ? 0 : k)].Item2, UriKind.Absolute));
 					});
 					m_text.Dispatcher.Invoke(() =>
 					{

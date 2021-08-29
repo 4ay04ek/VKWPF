@@ -37,7 +37,7 @@
         <Button Click="StartWorking" Grid.Column="0" Grid.Row="4" Margin="90,50,10,50">
             <Image x:Name="mainButtonImage" Source="Resources\playico.png" Height="84"></Image>
         </Button>
-        <Image x:Name="currentSending" Grid.Row="4" Grid.Column="1" Margin="10,50,496,50" Stretch="Uniform"></Image>
-        <TextBlock x:Name="log" Grid.Column="1" Grid.Row="4" Margin="220,111,50,111" FontFamily="Segoe UI Black" FontSize="36" VerticalAlignment="Center" Foreground="White"/>
+        <Image x:Name="currentSending" Grid.Row="1" Grid.Column="1" Margin="280,50,50,50" Stretch="Uniform" Grid.RowSpan="4"></Image>
+        <TextBlock x:Name="log" Grid.Column="1" Grid.Row="4" Margin="100,111,406,111" FontFamily="Segoe UI Black" FontSize="36" VerticalAlignment="Center" Foreground="White"/>
     </Grid>
 </Window>
