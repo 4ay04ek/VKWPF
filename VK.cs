@@ -13,18 +13,26 @@ using VkNet.Model;
 using Ookii;
 using System.Windows.Media.Imaging;
 using System.Linq;
+using VkNet.Exception;
+using System.Collections.Specialized;
+using VkNet.Utils.AntiCaptcha;
+using Microsoft.Extensions.DependencyInjection;
 
 namespace VKWPF
 {
-	class VK
+	class VK : ICaptchaSolver
 	{
 		private string m_path;
-		private string m_login;
+        private string m_login;
 		private string m_password;
 		private bool m_rewrite;
 		private int m_time;
+		private string m_twoFactorCode = "";
+		private TextBox m_twoFactor;
 		private System.Windows.Controls.Image m_image;
 		private TextBlock m_text;
+		private StreamReader info;
+		private VkApi api;
 		public static void Shuffle<T>(IList<T> list)
 		{
 			RNGCryptoServiceProvider provider = new RNGCryptoServiceProvider();
@@ -41,7 +49,6 @@ namespace VKWPF
 				list[n] = value;
 			}
 		}
-		private VkApi api;
 		private void send(string path)
 		{
 			string[] names = Directory.GetFiles(path);
@@ -80,24 +87,80 @@ namespace VKWPF
 			}
 			WebResponse response = await request.GetResponseAsync();
 		}
-		public void setProgressVisuals(System.Windows.Controls.Image image, TextBlock text)
+		string ICaptchaSolver.Solve(string url)
+        {
+			WebClient oWeb = new WebClient();
+			oWeb.DownloadFile(url, "captcha.jpg");
+			NameValueCollection parameters = new NameValueCollection();
+			parameters.Add("key", "c6b039b9edac2f7ae79c52502fcf6461");
+			parameters.Add("method", "post");
+			oWeb.QueryString = parameters;
+			var responseBytes = oWeb.UploadFile("http://rucaptcha.com/in.php", "captcha.jpg");
+			string response = Encoding.ASCII.GetString(responseBytes);
+			File.Delete("captcha.jpg");
+			string id = response.Split('|')[1];
+			parameters.Clear();
+			parameters.Add("key", "c6b039b9edac2f7ae79c52502fcf6461");
+			parameters.Add("action", "get");
+			parameters.Add("id", id);
+			oWeb.QueryString = parameters;
+			response = "CAPCHA_NOT_READY";
+			while (response == "CAPCHA_NOT_READY")
+			{
+				responseBytes = oWeb.UploadValues("http://rucaptcha.com/res.php", parameters);
+				response = Encoding.ASCII.GetString(responseBytes);
+				Thread.Sleep(1000);
+			}
+			return response.Split('|')[1];
+        }
+		void ICaptchaSolver.CaptchaIsFalse() {}
+		public void setAnswer(string code)
+        {
+			m_twoFactorCode = code;
+        }
+		public void setComponents(System.Windows.Controls.Image image, TextBlock text, TextBox twoFactor)
 		{
+			m_twoFactor = twoFactor;
 			m_image = image;
 			m_text = text;
 		}
+		public void closeFiles()
+        {
+			info.Close();
+        }
 		public void start()
 		{
+			bool wrong = false;
 			api.Authorize(new ApiAuthParams()
 			{
 				ApplicationId = 7886944,
 				Login = m_login,
 				Password = m_password,
-				Settings = Settings.All
+				Settings = Settings.All,
+				TwoFactorAuthorization = () =>
+				{
+					m_twoFactor.Dispatcher.Invoke(() =>
+					{
+						m_twoFactor.IsEnabled = true;
+						if (wrong)
+						{
+							m_twoFactor.Text = "";
+							m_twoFactorCode = "";
+						}
+					});
+					while (m_twoFactorCode.Length != 6) { }
+					m_twoFactor.Dispatcher.Invoke(() =>
+					{
+						m_twoFactor.IsEnabled = false;
+					});
+					wrong = true;
+					return m_twoFactorCode;
+				}
 			});
 			//hack(login, password);
 			var file = new FileInfo("info.txt");
 			if (!file.Exists || file.Length == 0 || m_rewrite) send(m_path);
-			StreamReader info = new StreamReader("info.txt");
+			info = new StreamReader("info.txt");
 			List<(string, string)> photos = new List<(string, string)>();
 			while (!info.EndOfStream)
 			{
@@ -129,7 +192,7 @@ namespace VKWPF
 		}
 		public VK(string path, string login, string password, bool rewrite, int time)
 		{
-			api = new VkApi();
+			api = new VkApi(null, this);
 			m_path = path;
 			m_login = login;
 			m_password = password;

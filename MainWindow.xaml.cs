@@ -16,6 +16,7 @@ namespace VKWPF
         private string startingFolderPath;
         private bool workingState = false;
         private Thread main_thread;
+        private VK vk;
         public MainWindow()
         {
             InitializeComponent();
@@ -46,6 +47,10 @@ namespace VKWPF
                 folder_path.Text = dialog.SelectedPath;
             }
         }
+        private void twoFactorChanged(object sender, System.Windows.Controls.TextChangedEventArgs e)
+        {
+            if (twoFactor.Text.Length == 6) vk.setAnswer(twoFactor.Text);
+        }
         private void StartWorking(object sender, RoutedEventArgs e)
         {
             if (!workingState)
@@ -57,8 +62,8 @@ namespace VKWPF
                 pauseTime.IsEnabled = false;
                 folderButton.IsEnabled = false;
                 workingState = true;
-                VK vk = new VK(folder_path.Text, login.Text, password.Text, startingFolderPath != folder_path.Text, Convert.ToInt32(pauseTime.Text));
-                vk.setProgressVisuals(currentSending, log);
+                vk = new VK(folder_path.Text, login.Text, password.Text, startingFolderPath != folder_path.Text, Convert.ToInt32(pauseTime.Text));
+                vk.setComponents(currentSending, log, twoFactor);
                 main_thread = new Thread(vk.start);
                 main_thread.Start();
             }
@@ -73,6 +78,7 @@ namespace VKWPF
                 workingState = false;
                 currentSending.Source = new BitmapImage();
                 log.Text = "";
+                vk.closeFiles();
                 main_thread.Abort();
             }
         }
@@ -83,5 +89,7 @@ namespace VKWPF
             cache.WriteLine(folder_path.Text + "|" + login.Text + "|" + password.Text + "|" + pauseTime.Text);
             cache.Close();
         }
+
+
     }
 }

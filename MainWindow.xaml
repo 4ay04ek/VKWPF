@@ -33,6 +33,7 @@
         </Button>
         <TextBox x:Name="login" Grid.Column="1" Grid.Row="1" Margin="10,20,480,15" FontSize="15" FontFamily="v_Nasalization" Padding="0,2"/>
         <TextBox x:Name="password" Grid.Column="1" Grid.Row="2" Margin="10,20,480,15" FontSize="15" FontFamily="v_Nasalization" Padding="0,2"/>
+        <TextBox x:Name="twoFactor" Grid.Column="1" Grid.Row="2" Margin="210,20,375,15" FontSize="15" FontFamily="v_Nasalization" Padding="0,2" IsEnabled="False" TextChanged="twoFactorChanged"/>
         <TextBox x:Name="pauseTime" Grid.Column="1" Grid.Row="3" Margin="10,20,620,15" FontSize="15" FontFamily="v_Nasalization" Padding="0,2"/>
         <Button Click="StartWorking" Grid.Column="0" Grid.Row="4" Margin="90,50,10,50">
             <Image x:Name="mainButtonImage" Source="Resources\playico.png" Height="84"></Image>
