@@ -16,6 +16,7 @@ using System.Linq;
 using VkNet.Exception;
 using System.Collections.Specialized;
 using VkNet.Utils.AntiCaptcha;
+using VkNet.AudioBypassService.Extensions;
 using Microsoft.Extensions.DependencyInjection;
 
 namespace VKWPF
@@ -33,22 +34,6 @@ namespace VKWPF
 		private TextBlock m_text;
 		private StreamReader info;
 		private VkApi api;
-		public static void Shuffle<T>(IList<T> list)
-		{
-			RNGCryptoServiceProvider provider = new RNGCryptoServiceProvider();
-			int n = list.Count;
-			while (n > 1)
-			{
-				byte[] box = new byte[1];
-				do provider.GetBytes(box);
-				while (!(box[0] < n * (Byte.MaxValue / n)));
-				int k = (box[0] % n);
-				n--;
-				T value = list[k];
-				list[k] = list[n];
-				list[n] = value;
-			}
-		}
 		private void send(string path)
 		{
 			string[] names = Directory.GetFiles(path);
@@ -171,8 +156,8 @@ namespace VKWPF
 			if (photos.Count < Directory.GetFiles(m_path).Length) send(m_path);
 			while (true)
 			{
-				Shuffle(photos);
-				for(int i = 0; i < photos.Count; i++)
+				photos = photos.OrderBy(a => Guid.NewGuid()).ToList();
+				for (int i = 0; i < photos.Count; i++)
 				{
 					int k = i + 1;
 					api.Photo.SaveOwnerPhoto(photos[i].Item1);
@@ -192,7 +177,10 @@ namespace VKWPF
 		}
 		public VK(string path, string login, string password, bool rewrite, int time)
 		{
-			api = new VkApi(null, this);
+			var services = new ServiceCollection();
+			services.AddAudioBypass();
+			services.AddSingleton<ICaptchaSolver>(this);
+			api = new VkApi(services);
 			m_path = path;
 			m_login = login;
 			m_password = password;
